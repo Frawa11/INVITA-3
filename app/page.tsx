@@ -1,94 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Heart, Star, Music, Calendar } from "lucide-react";
-import { useState } from "react";
+import { Search, Heart, Star, Music, Calendar, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import ParticleBackground from "@/components/ui/ParticleBackground";
+import { EventData } from "@/components/admin/EditorPanel";
 
-// Mock Data for Templates
-const TEMPLATES = [
-    {
-        id: 1,
-        title: "Mis 15 Años - Luciana",
-        category: "15 Años",
-        image: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&q=80&w=1000",
-        color: "from-purple-500 to-pink-500",
-        price: "Premium"
-    },
-    {
-        id: 2,
-        title: "Boda Elegante - Ana & Carlos",
-        category: "Bodas",
-        image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1000",
-        color: "from-slate-800 to-slate-600",
-        price: "Premium"
-    },
-    {
-        id: 3,
-        title: "Bautizo - Santiago",
-        category: "Bautizos",
-        image: "https://images.unsplash.com/photo-1519834785169-98be25ec3f84?auto=format&fit=crop&q=80&w=1000",
-        color: "from-blue-400 to-blue-200",
-        price: "Básico"
-    },
-    {
-        id: 4,
-        title: "Baby Shower - Es Niño",
-        category: "Baby Shower",
-        image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=1000",
-        color: "from-sky-400 to-sky-200",
-        price: "Básico"
-    },
-    {
-        id: 5,
-        title: "Cumpleaños Infantil - Superhéroes",
-        category: "Cumpleaños Infantiles",
-        image: "https://images.unsplash.com/photo-1530103862676-de3c9da59af7?auto=format&fit=crop&q=80&w=1000",
-        color: "from-red-500 to-blue-500",
-        price: "Premium"
-    },
-    {
-        id: 6,
-        title: "50 Años - Bodas de Oro",
-        category: "50 Años",
-        image: "https://images.unsplash.com/photo-1533174072545-e8d4aa97edf9?auto=format&fit=crop&q=80&w=1000",
-        color: "from-yellow-600 to-yellow-400",
-        price: "Premium"
-    },
-    {
-        id: 7,
-        title: "Graduación 2025",
-        category: "Graduación",
-        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1000",
-        color: "from-gray-900 to-gray-700",
-        price: "Básico"
-    },
-    {
-        id: 8,
-        title: "Evento Corporativo - Tech Summit",
-        category: "Eventos Corporativos",
-        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=1000",
-        color: "from-blue-900 to-blue-700",
-        price: "Empresarial"
-    },
-    {
-        id: 9,
-        title: "Mis 15 - Valentina",
-        category: "15 Años",
-        image: "https://images.unsplash.com/photo-1549057446-9f5c6ac91a04?auto=format&fit=crop&q=80&w=1000",
-        color: "from-pink-500 to-rose-400",
-        price: "Premium"
-    }
-];
+// STATIC TEMPLATES CLEANED (Vacío)
+const STATIC_TEMPLATES: any[] = [];
 
 const CATEGORIES = ["Todos", "15 Años", "Bodas", "Bautizos", "Baby Shower", "Cumpleaños Infantiles", "50 Años", "Graduación", "Eventos Corporativos"];
 
 export default function Home() {
     const [selectedCategory, setSelectedCategory] = useState("Todos");
     const [searchQuery, setSearchQuery] = useState("");
+    const [publicEvents, setPublicEvents] = useState<any[]>([]);
 
-    const filteredTemplates = TEMPLATES.filter(template => {
+    // Load Public Events from LocalStorage
+    useEffect(() => {
+        const savedEvents = localStorage.getItem('invita_events');
+        if (savedEvents) {
+            const allEvents: EventData[] = JSON.parse(savedEvents);
+            // Filtrar solo los que tienen isPublic = true
+            const published = allEvents.filter(e => e.isPublic).map(e => ({
+                id: e.id,
+                title: `${e.type} - ${e.celebrantName}`,
+                category: e.category || "Varios",
+                image: e.backgroundUrl || "https://images.unsplash.com/photo-1530103862676-de3c9da59af7", // Fallback
+                color: "from-blue-500 to-purple-500",
+                price: "Real",
+                views: e.views || 0
+            }));
+            setPublicEvents(published);
+        }
+    }, []);
+
+    // Combine (ahora solo publicEvents porque STATIC está vacío)
+    const allItems = [...publicEvents, ...STATIC_TEMPLATES];
+
+    const filteredTemplates = allItems.filter(template => {
         const matchesCategory = selectedCategory === "Todos" || template.category === selectedCategory;
         const matchesSearch = template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             template.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -186,7 +137,8 @@ export default function Home() {
                 {filteredTemplates.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredTemplates.map((template) => (
-                            <Link href={`/invitation/${template.id}`} key={template.id} className="group block">
+                            // AÑADIDO: ?from=gallery
+                            <Link href={`/invitation/${template.id}?from=gallery`} key={template.id} className="group block">
                                 <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col">
                                     {/* Image Placeholder with Gradient */}
                                     <div className={cn("h-48 w-full bg-gradient-to-br relative overflow-hidden", template.color)}>
@@ -217,10 +169,6 @@ export default function Home() {
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="w-4 h-4" />
                                                 <span>Agenda</span>
-                                            </div>
-                                            <div className="flex items-center gap-1 ml-auto">
-                                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                <span>4.9</span>
                                             </div>
                                         </div>
                                     </div>
