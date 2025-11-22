@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .font-great-vibes {
+    font-family: 'Great Vibes', cursive;
+  }
+
+  .text-gold-400 {
+    color: #D4AF37;
+  }
+
+  .border-gold-400 {
+    border-color: #D4AF37;
+  }
+}
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 198, 255;
+  --background-end-rgb: 98, 0, 234;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom right,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb)));
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/95 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+}
