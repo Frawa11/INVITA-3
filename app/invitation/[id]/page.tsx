@@ -349,9 +349,20 @@ export default function InvitationPage({ params }: { params: { id: string } }) {
                     {event.dressCode && (
                         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="py-8 px-6 text-center">
                             <div className={isNeon ? neonCardClass : isMinimal ? 'bg-white/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-sm' : 'bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-2xl border border-white/10 shadow-xl'} style={isNeon ? neonStyle : {}}>
-                                <Shirt className="w-8 h-8 mx-auto mb-4 opacity-80" style={{ color: primaryColor }} />
                                 <h3 className={`text-2xl ${titleFont} mb-2`} style={{ color: primaryColor }}>Código de Vestimenta</h3>
-                                <p className="font-light leading-relaxed tracking-wide" style={{ color: textColor }}>{event.dressCode}</p>
+                                <div className="flex justify-center items-center gap-4 mb-4">
+                                    {event.dressCode.includes('Formal') && (
+                                        <>
+                                            <span className="text-4xl" style={{ color: primaryColor }}>👔</span>
+                                            <span className="text-4xl" style={{ color: primaryColor }}>👠</span>
+                                        </>
+                                    )}
+                                    {!event.dressCode.includes('Formal') && <Shirt className="w-8 h-8 opacity-80" style={{ color: primaryColor }} />}
+                                </div>
+                                <p className="font-light leading-relaxed tracking-wide" style={{ color: textColor }}>
+                                    {event.dressCode}
+                                    {event.dressCode === 'Formal' && ": Corbata para hombres y Tacones para mujeres"}
+                                </p>
                             </div>
                         </motion.section>
                     )}
