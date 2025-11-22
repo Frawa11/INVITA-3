@@ -12,6 +12,7 @@ interface EventData {
     parents: string;
     godparents: string;
     address: string;
+    mapsUrl?: string;
     backgroundUrl: string;
     galleryUrl1: string;
     galleryUrl2: string;
@@ -104,6 +105,52 @@ export default function InvitationPage({ params }: { params: { id: string } }) {
         const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(exactSearch)}`;
         window.open(mapsUrl, '_blank');
     };
+
+    // --- Lógica del Calendario Dinámico ---
+    const renderCalendarDays = () => {
+        if (!event) return [];
+
+        const eventDate = new Date(event.date);
+        const year = eventDate.getFullYear();
+        const month = eventDate.getMonth();
+        const selectedDay = eventDate.getDate();
+
+        // Primer día del mes (0 = Domingo, 1 = Lunes, etc.)
+        // En JS getDay() devuelve Domingo=0. 
+        // En el diseño el calendario empieza Lunes (L, M, M, J, V, S, D).
+        // Ajustamos para que Lunes sea 0 y Domingo sea 6.
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        // Ajuste: Si es domingo (0) -> se vuelve 6. Si es lunes (1) -> se vuelve 0.
+        const startDayIndex = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const days = [];
+        
+        // Rellenar espacios vacíos antes del día 1
+        for (let i = 0; i < startDayIndex; i++) {
+            days.push(<span key={`empty-${i}`} className="opacity-0"></span>);
+        }
+
+        // Rellenar días del mes
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isSelected = d === selectedDay;
+            if (isSelected) {
+                days.push(
+                    <span key={d} className="relative flex items-center justify-center text-white font-bold">
+                        <span className="absolute inset-0 bg-purple-600 rounded-full shadow-md"></span>
+                        <span className="relative z-10">{d}</span>
+                    </span>
+                );
+            } else {
+                days.push(<span key={d}>{d}</span>);
+            }
+        }
+
+        return days;
+    };
+    // -------------------------------------
+
 
     // Show loading state while event is being loaded
     if (!event) {
@@ -198,18 +245,7 @@ export default function InvitationPage({ params }: { params: { id: string } }) {
                             <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
                         </div>
                         <div className="grid grid-cols-7 gap-2 text-gray-700 font-medium">
-                            {/* Mock Calendar Days - Adjust logic for real calendar */}
-                            <span className="opacity-0">27</span><span className="opacity-0">28</span><span className="opacity-0">29</span><span className="opacity-0">30</span><span className="opacity-0">31</span>
-                            <span>1</span><span>2</span>
-                            <span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
-                            <span>10</span><span>11</span><span>12</span><span>13</span><span>14</span>
-                            <span className="relative flex items-center justify-center text-white font-bold">
-                                <span className="absolute inset-0 bg-purple-600 rounded-full shadow-md"></span>
-                                <span className="relative z-10">15</span>
-                            </span>
-                            <span>16</span>
-                            <span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span>
-                            <span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
+                            {renderCalendarDays()}
                         </div>
                     </div>
                 </section>
